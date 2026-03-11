@@ -5,3 +5,7 @@ Angel Lugo - My Favorite Quote:
 
 Andrea's quote:
     "All who call on God in true faith will certanly be heard." Martin Luther
+
+
+    Brandon's quote:
+        “It always seems impossible until it’s done.” Nelson Mandela.
