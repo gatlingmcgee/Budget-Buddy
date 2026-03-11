@@ -8,3 +8,8 @@ Andrea's quote:
 
 Sean Sonderegger
 “Let your light so shine before men, that they may see your good works.”
+    "All who call on God in true faith will certanly be heard." Martin Luther
+
+
+    Brandon's quote:
+        “It always seems impossible until it’s done.” Nelson Mandela.
