@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///C:/BYU/BYU_WINTER_2026_TERM_2/CSE499/Budget-Buddy/pages/_app.js"],"sourcesContent":["// pages/_app.js\r\nimport '../styles/styles.css'\r\n\r\nexport default function App({ Component, pageProps }) {\r\n  return <Component {...pageProps} />\r\n}"],"names":[],"mappings":"AAAA,gBAAgB;;;;;;;;AAGD,SAAS,IAAI,EAAE,SAAS,EAAE,SAAS,EAAE;IAClD,qBAAO,qKAAC;QAAW,GAAG,SAAS;;;;;;AACjC"}}]
+}

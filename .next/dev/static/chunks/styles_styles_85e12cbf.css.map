@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///C:/BYU/BYU_WINTER_2026_TERM_2/CSE499/Budget-Buddy/styles/styles.css"],"sourcesContent":["/* style.css */\r\n\r\nbody {\r\n  font-family: Arial, sans-serif;\r\n  margin: 0;\r\n  padding: 0;\r\n  background-color: #f4f4f4;\r\n  text-align: center;\r\n}\r\n\r\n.nav-links {\r\n  display: grid;\r\n  grid-template-columns: auto auto auto auto;\r\n  justify-content: space-around;\r\n  padding: 20px;\r\n  font-size: 20px;\r\n}\r\n\r\na {\r\n  text-decoration: none;\r\n  color: #333;\r\n  font-weight: bold;\r\n}\r\n\r\na:hover {\r\n  transform: scale(1.1);\r\n}"],"names":[],"mappings":"AAEA;;;;;;;;AAQA;;;;;;;;AAQA;;;;;;AAMA"}}]
+}
