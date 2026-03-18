@@ -5,7 +5,7 @@ export default function Home() {
         <nav>
           <h1>Dashboard overview for Budget Buddy</h1>
           <div className="nav-links">
-            <a href="#">Login Page</a>
+            <a href="login">Login Page</a>
             <a href="#">Budget Page</a>
             <a href="#">Expense Tracking Page</a>
             <a href="#">Enhancement Page</a>
