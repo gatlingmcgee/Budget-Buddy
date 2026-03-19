@@ -1,0 +1,29 @@
+{
+  "name": "budget-buddy",
+  "version": "1.0.0",
+  "description": "Angel Lugo - My Favorite Quote:\r “The Dalai Lama, when asked what surprised him most about humanity, answered \"Man! Because he sacrifices his health in order to make money. Then he sacrifices money to recuperate his health. And then he is so anxious about the future that he does not enjoy the present; the result being that he does not live in the present or the future; he lives as if he is never going to die, and then dies having never really lived.” - Dalai Lama",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gatlingmcgee/Budget-Buddy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gatlingmcgee/Budget-Buddy/issues"
+  },
+  "homepage": "https://github.com/gatlingmcgee/Budget-Buddy#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "next": "^16.1.7",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

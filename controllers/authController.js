@@ -1,9 +1,9 @@
-const bcrypt = require("bcryptjs");
+import bcrypt from "bcryptjs";
 
 // TODO: Replace in-memory storage with PostgreSQL in next sprint
 const users = [];
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { username, password, email } = req.body;
 
@@ -53,7 +53,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -95,9 +95,4 @@ const loginUser = async (req, res) => {
       message: "Server error during login",
     });
   }
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
 };
