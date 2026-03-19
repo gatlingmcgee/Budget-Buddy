@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import pool from "../lib/db";
+import prisma from "../lib/prisma";
 
 export const registerUser = async (req, res) => {
   try {
@@ -13,10 +13,13 @@ export const registerUser = async (req, res) => {
     }
 
     // Check if user already exists
-    const checkUserQuery = "SELECT * FROM users WHERE username = $1 OR email = $2";
-    const existingUserRes = await pool.query(checkUserQuery, [username, email]);
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ username }, { email }],
+      },
+    });
 
-    if (existingUserRes.rows.length > 0) {
+    if (existingUser) {
       return res.status(400).json({
         message: "User already exists",
       });
@@ -26,13 +29,14 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
-    const insertUserQuery = `
-      INSERT INTO users (username, email, password)
-      VALUES ($1, $2, $3)
-      RETURNING id, username, email
-    `;
-    const newUserRes = await pool.query(insertUserQuery, [username, email, hashedPassword]);
-    const newUser = newUserRes.rows[0];
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+      },
+      select: { id: true, username: true, email: true },
+    });
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -62,16 +66,15 @@ export const loginUser = async (req, res) => {
     }
 
     // Find user
-    const findUserQuery = "SELECT * FROM users WHERE username = $1";
-    const userRes = await pool.query(findUserQuery, [username]);
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
 
-    if (userRes.rows.length === 0) {
+    if (!user) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
     }
-
-    const user = userRes.rows[0];
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
