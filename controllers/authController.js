@@ -1,7 +1,5 @@
 import bcrypt from "bcryptjs";
-
-// TODO: Replace in-memory storage with PostgreSQL in next sprint
-const users = [];
+import pool from "../lib/db";
 
 export const registerUser = async (req, res) => {
   try {
@@ -14,12 +12,11 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Check if user already exists (by username OR email)
-    const existingUser = users.find(
-      (user) => user.username === username || user.email === email
-    );
+    // Check if user already exists
+    const checkUserQuery = "SELECT * FROM users WHERE username = $1 OR email = $2";
+    const existingUserRes = await pool.query(checkUserQuery, [username, email]);
 
-    if (existingUser) {
+    if (existingUserRes.rows.length > 0) {
       return res.status(400).json({
         message: "User already exists",
       });
@@ -29,14 +26,13 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
-    const newUser = {
-      id: users.length + 1,
-      username,
-      email,
-      password: hashedPassword,
-    };
-
-    users.push(newUser);
+    const insertUserQuery = `
+      INSERT INTO users (username, email, password)
+      VALUES ($1, $2, $3)
+      RETURNING id, username, email
+    `;
+    const newUserRes = await pool.query(insertUserQuery, [username, email, hashedPassword]);
+    const newUser = newUserRes.rows[0];
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -47,6 +43,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Registration error:", error);
     return res.status(500).json({
       message: "Server error during registration",
     });
@@ -65,13 +62,16 @@ export const loginUser = async (req, res) => {
     }
 
     // Find user
-    const user = users.find((user) => user.username === username);
+    const findUserQuery = "SELECT * FROM users WHERE username = $1";
+    const userRes = await pool.query(findUserQuery, [username]);
 
-    if (!user) {
+    if (userRes.rows.length === 0) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
     }
+
+    const user = userRes.rows[0];
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -91,6 +91,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
     return res.status(500).json({
       message: "Server error during login",
     });
