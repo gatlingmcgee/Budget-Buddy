@@ -8,11 +8,59 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique @db.VarChar(50)
-  email      String   @unique @db.VarChar(150)
-  password   String   @db.VarChar(255)
-  created_at DateTime @default(now())
+  id         Int       @id @default(autoincrement())
+  username   String    @unique @db.VarChar(50)
+  email      String    @unique @db.VarChar(150)
+  password   String    @db.VarChar(255)
+  first_name String?   @db.VarChar(50)
+  last_name  String?   @db.VarChar(50)
+  created_at DateTime  @default(now())
+
+  expenses   Expense[]
+  incomes    Income[]
+  budgets    Budget[]
 
   @@map("users")
+}
+
+model Expense {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  name       String   @db.VarChar(255)
+  amount     Decimal  @db.Decimal(10, 2)
+  category   String   @db.VarChar(100)
+  date       DateTime
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+model Income {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  name       String   @db.VarChar(255)
+  amount     Decimal  @db.Decimal(10, 2)
+  date       DateTime
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("incomes")
+}
+
+model Budget {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  amount     Decimal  @db.Decimal(10, 2) // Limit amount
+  category   String   @default("Overall") @db.VarChar(100) // "Overall" for monthly limit, or specific like "Food"
+  month      Int      // 1-12
+  year       Int      // e.g. 2026
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, month, year, category])
+  @@map("budgets")
 }
