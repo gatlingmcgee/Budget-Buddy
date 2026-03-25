@@ -18,9 +18,10 @@ export default function Home() {
             ) : (
               <button onClick={() => signOut()}>Logout</button>
             )}
-            <a href="#">Budget Page</a>
-            <a href="#">Expense Tracking Page</a>
-            <a href="#">Enhancement Page</a>
+            <a href="dashboard">Dashboard Page</a>
+            <a href="budget">Budget Page</a>
+            <a href="expenses">Expense Tracking Page</a>
+            <a href="enhancements">Enhancement Page</a>
           </div>
         </nav>
 
