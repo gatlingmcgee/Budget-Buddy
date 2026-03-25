@@ -1,11 +1,23 @@
+import { useSession, signOut } from "next-auth/react";
+
 export default function Home() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div>
       <header>
         <nav>
           <h1>Dashboard overview for Budget Buddy</h1>
           <div className="nav-links">
-            <a href="login">Login Page</a>
+            {!session ? (
+              <a href="login">Login Page</a>
+            ) : (
+              <button onClick={() => signOut()}>Logout</button>
+            )}
             <a href="#">Budget Page</a>
             <a href="#">Expense Tracking Page</a>
             <a href="#">Enhancement Page</a>
@@ -14,6 +26,15 @@ export default function Home() {
 
         <section>
           <h1>Visualization for Enhancements</h1>
+
+          {session ? (
+            <div>
+              <p>Welcome, {session.user.username}</p>
+              <p>User ID: {session.user.id}</p>
+            </div>
+          ) : (
+            <p>You are not logged in</p>
+          )}
         </section>
       </header>
 
@@ -22,14 +43,4 @@ export default function Home() {
       </footer>
     </div>
   );
-}
-
-async function testBackend() {
-  try {
-    const res = await fetch('/api/test');
-    const data = await res.json();
-    alert(data.message);
-  } catch (err) {
-    alert('Backend not reachable');
-  }
 }
