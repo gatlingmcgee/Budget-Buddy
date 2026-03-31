@@ -23,3 +23,44 @@ a {
 a:hover {
   transform: scale(1.1);
 }
+
+/* Global Navbar Styles */
+.navbar {
+  padding: 1rem 3rem; 
+  border-bottom: 1px solid #ddd; 
+  background-color: #fff; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nav-actions {
+  display: flex; 
+  gap: 1.5rem; 
+  align-items: center;
+}
+
+.nav-actions button {
+  cursor: pointer; 
+  background: transparent; 
+  border: none; 
+  font-weight: 500;
+  font-size: 1rem;
+  color: #555;
+  transition: color 0.2s, transform 0.1s;
+}
+
+.nav-actions button:hover {
+  color: #2563eb;
+  transform: scale(1.05);
+}
+
+.nav-actions .logout-btn {
+  font-weight: 700;
+  color: #e63946;
+}
+
+.nav-actions .logout-btn:hover {
+  color: #dc2626;
+}

@@ -44,17 +44,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      {/* NAVBAR */}
-      <nav className="navbar">
-        <h2>Budget Buddy</h2>
-        <div className="nav-actions">
-          <button onClick={() => router.push("/")}>Home</button>
-          <button onClick={() => router.push("/budget")}>Budget</button>
-          <button onClick={() => router.push("/expenses")}>Expenses</button>
-          <button onClick={() => signOut()}>Logout</button>
-        </div>
-      </nav>
-
       {/* HEADER */}
       <header className="header">
         <h1>Welcome back, {session.user.username}</h1>
