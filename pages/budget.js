@@ -7,40 +7,91 @@ export default function Budget() {
   const router = useRouter();
 
   const [budgets, setBudgets] = useState([]);
-  const [form, setForm] = useState({ name: "", amount: "" });
+  const [form, setForm] = useState({
+    amount: "",
+    category: "Overall",
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+  });
 
-  // Protect route
+  const [loadingBudgets, setLoadingBudgets] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
   useEffect(() => {
     if (status === "loading") return;
     if (!session) router.push("/login");
-  }, [session, status]);
+  }, [session, status, router]);
 
-  // Fetch budgets
   const fetchBudgets = async () => {
-    const res = await fetch("/api/budgets");
-    const data = await res.json();
-    setBudgets(data);
+    try {
+      setLoadingBudgets(true);
+      setError("");
+
+      const res = await fetch("/api/budget");
+      if (!res.ok) throw new Error("Failed to fetch budgets");
+
+      const data = await res.json();
+      setBudgets(data);
+    } catch (err) {
+      console.error(err);
+      setError("Could not load budgets");
+    } finally {
+      setLoadingBudgets(false);
+    }
   };
 
   useEffect(() => {
     if (session) fetchBudgets();
   }, [session]);
 
-  // Handle form change
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  // Submit new budget
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await fetch("/api/budgets", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, amount: parseFloat(form.amount) }),
-    });
+    setMessage("");
+    setError("");
 
-    setForm({ name: "", amount: "" });
-    fetchBudgets();
+    if (!form.amount || Number(form.amount) <= 0) {
+      setError("Amount must be greater than 0");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch("/api/budget", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          amount: parseFloat(form.amount),
+          month: parseInt(form.month, 10),
+          year: parseInt(form.year, 10),
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to create budget");
+
+      setForm({
+        amount: "",
+        category: "Overall",
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      });
+
+      setMessage("Budget added successfully");
+      fetchBudgets();
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong while creating the budget");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (status === "loading") return <p>Loading...</p>;
@@ -48,48 +99,79 @@ export default function Budget() {
 
   return (
     <div className="budget-page">
-      <h1> Budget Tracker</h1>
+      <h1>Budget Tracker</h1>
 
-      {/* ADD BUDGET FORM */}
+      {message && <p className="success-message">{message}</p>}
+      {error && <p className="error-message">{error}</p>}
+
       <form onSubmit={handleSubmit} className="budget-form">
-        <input
-          name="name"
-          placeholder="Budget Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
         <input
           name="amount"
           type="number"
-          placeholder="Amount"
+          step="0.01"
+          placeholder="Budget Amount"
           value={form.amount}
           onChange={handleChange}
           required
         />
-        <button type="submit">Add Budget</button>
+
+        <input
+          name="category"
+          placeholder="Category"
+          value={form.category}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="month"
+          type="number"
+          min="1"
+          max="12"
+          placeholder="Month"
+          value={form.month}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="year"
+          type="number"
+          placeholder="Year"
+          value={form.year}
+          onChange={handleChange}
+          required
+        />
+
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Saving..." : "Add Budget"}
+        </button>
       </form>
 
-      {/* BUDGET LIST */}
       <div className="budget-list">
         <h2>All Budgets</h2>
-        {budgets.length === 0 ? (
+
+        {loadingBudgets ? (
+          <p>Loading budgets...</p>
+        ) : budgets.length === 0 ? (
           <p>No budgets yet</p>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Category</th>
                 <th>Amount</th>
-                <th>Remaining</th>
+                <th>Month</th>
+                <th>Year</th>
               </tr>
             </thead>
             <tbody>
               {budgets.map((budget) => (
                 <tr key={budget.id}>
-                  <td>{budget.name}</td>
-                  <td>${budget.amount}</td>
-                  <td>${budget.remaining ?? budget.amount}</td>
+                  <td>{budget.category}</td>
+                  <td>${Number(budget.amount).toFixed(2)}</td>
+                  <td>{budget.month}</td>
+                  <td>{budget.year}</td>
                 </tr>
               ))}
             </tbody>
