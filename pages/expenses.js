@@ -46,15 +46,6 @@ export default function Expenses() {
 
   return (
     <div className="expenses-page">
-      {/* NAVBAR */}
-      <nav className="navbar">
-        <h2> Budget Buddy</h2>
-        <div className="nav-actions">
-          <button onClick={() => router.push("/")}> Home</button>
-          <button onClick={() => router.push("/dashboard")}> Dashboard</button>
-        </div>
-      </nav>
-
       <h1> Expense Tracker</h1>
 
       {/* ADD EXPENSE FORM */}

@@ -48,16 +48,6 @@ export default function Budget() {
 
   return (
     <div className="budget-page">
-      {/* NAVBAR */}
-      <nav className="navbar">
-        <h2> Budget Buddy</h2>
-        <div className="nav-actions">
-          <button onClick={() => router.push("/")}> Home</button>
-          <button onClick={() => router.push("/dashboard")}> Dashboard</button>
-          <button onClick={() => router.push("/expenses")}> Expenses</button>
-        </div>
-      </nav>
-
       <h1> Budget Tracker</h1>
 
       {/* ADD BUDGET FORM */}

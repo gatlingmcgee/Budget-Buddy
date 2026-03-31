@@ -10,21 +10,6 @@ export default function Home() {
   return (
     <div>
       <header>
-        <nav>
-          <h1>Dashboard overview for Budget Buddy</h1>
-          <div className="nav-links">
-            {!session ? (
-              <a href="login">Login Page</a>
-            ) : (
-              <button onClick={() => signOut()}>Logout</button>
-            )}
-            <a href="dashboard">Dashboard Page</a>
-            <a href="budget">Budget Page</a>
-            <a href="expenses">Expense Tracking Page</a>
-            <a href="enhancements">Enhancement Page</a>
-          </div>
-        </nav>
-
         <section>
           <h1>Visualization for Enhancements</h1>
 
