@@ -12,35 +12,75 @@ export default async function handler(req, res) {
     const userId = parseInt(session.user.id, 10);
 
     if (req.method === "GET") {
-      // Return all expenses for user
       const expenses = await prisma.expense.findMany({
         where: { user_id: userId },
-        orderBy: { date: "desc" },
+        orderBy: [
+          { date: "desc" },
+          { created_at: "desc" } // Use actual creation time as the tie-breaker!
+        ],
       });
       return res.status(200).json(expenses);
     }
 
     if (req.method === "POST") {
-      const { title, amount, category, date } = req.body;
+      const { name, amount, category, date } = req.body;
 
-      if (!title || amount === undefined || !category) {
+      if (!name || amount === undefined || !category || !date) {
         return res.status(400).json({ message: "All fields are required" });
       }
 
       const newExpense = await prisma.expense.create({
         data: {
           user_id: userId,
-          name: title,
+          name,
           amount: parseFloat(amount),
           category,
-          date: date ? new Date(date) : new Date(),
+          date: new Date(date),
         },
       });
 
       return res.status(201).json(newExpense);
     }
+    
+    if (req.method === "PUT") {
+      const { id, name, amount, category, date } = req.body;
 
-    res.setHeader("Allow", ["GET", "POST"]);
+      if (!id || !name || amount === undefined || !category || !date) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      const expense = await prisma.expense.findUnique({ where: { id: parseInt(id, 10) } });
+      if (!expense || expense.user_id !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updatedExpense = await prisma.expense.update({
+        where: { id: parseInt(id, 10) },
+        data: {
+          name,
+          amount: parseFloat(amount),
+          category,
+          date: new Date(date),
+        },
+      });
+
+      return res.status(200).json(updatedExpense);
+    }
+
+    if (req.method === "DELETE") {
+      const { id } = req.body;
+      if (!id) return res.status(400).json({ message: "Expense ID is required" });
+
+      const expense = await prisma.expense.findUnique({ where: { id: parseInt(id, 10) } });
+      if (!expense || expense.user_id !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      await prisma.expense.delete({ where: { id: parseInt(id, 10) } });
+      return res.status(200).json({ message: "Deleted successfully" });
+    }
+
+    res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (error) {
     console.error("Expenses API Error:", error);
