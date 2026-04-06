@@ -134,8 +134,22 @@ export default function Expenses() {
     new Set(expenses.map((exp) => exp.category))
   );
 
+  const searchParam = router.query.search || "";
+
   const filteredExpenses = expenses.filter(
-    (exp) => filter === "All" || exp.category === filter
+    (exp) => {
+      const matchCategoryDrop = filter === "All" || exp.category === filter;
+      const term = searchParam.toLowerCase();
+      
+      if (!term) return matchCategoryDrop;
+      
+      const matchSearch = exp.name.toLowerCase().includes(term) ||
+        exp.category.toLowerCase().includes(term) ||
+        new Date(exp.date).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }).toLowerCase().includes(term) ||
+        exp.date.includes(term);
+        
+      return matchCategoryDrop && matchSearch;
+    }
   );
 
   if (status === "loading") return <p>Loading...</p>;
