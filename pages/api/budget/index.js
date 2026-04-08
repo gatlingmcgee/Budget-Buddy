@@ -140,9 +140,52 @@ export default async function handler(req, res) {
     }
 
     // =========================
+    // PUT - Update existing budget by ID
+    // =========================
+    if (req.method === "PUT") {
+      const { id, amount, month, year, category } = req.body;
+
+      if (!id) {
+        return res.status(400).json({ message: "Budget ID is required" });
+      }
+
+      if (amount === undefined || !month || !year) {
+        return res.status(400).json({ message: "Amount, month, and year are required" });
+      }
+
+      const parsedId = parseInt(id, 10);
+      const parsedAmount = parseFloat(amount);
+      const parsedMonth = parseInt(month, 10);
+      const parsedYear = parseInt(year, 10);
+
+      if (isNaN(parsedId) || isNaN(parsedAmount) || isNaN(parsedMonth) || isNaN(parsedYear)) {
+        return res.status(400).json({ message: "Invalid numeric values" });
+      }
+
+      const budgetCategory = category || "Overall";
+
+      const existing = await prisma.budget.findUnique({ where: { id: parsedId } });
+      if (!existing || existing.user_id !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updatedBudget = await prisma.budget.update({
+        where: { id: parsedId },
+        data: {
+          amount: parsedAmount,
+          month: parsedMonth,
+          year: parsedYear,
+          category: budgetCategory,
+        },
+      });
+
+      return res.status(200).json(updatedBudget);
+    }
+
+    // =========================
     // ❌ Method Not Allowed
     // =========================
-    res.setHeader("Allow", ["GET", "POST", "DELETE"]);
+    res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
 
   } catch (error) {
