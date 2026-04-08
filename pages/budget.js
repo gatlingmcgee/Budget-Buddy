@@ -14,6 +14,7 @@ export default function Budget() {
     year: new Date().getFullYear(),
   });
   const [editingId, setEditingId] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -28,6 +29,7 @@ export default function Budget() {
     try {
       const res = await fetch("/api/budget");
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.message);
 
       setBudgets(data);
@@ -40,12 +42,31 @@ export default function Budget() {
     if (session) fetchBudgets();
   }, [session]);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setFieldErrors({});
+    setForm({
+      amount: "",
+      category: "Overall",
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+    });
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setForm({ ...form, [name]: value });
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
   const handleEdit = (b) => {
     setEditingId(b.id);
+    setFieldErrors({});
     setForm({
       amount: b.amount,
       category: b.category,
@@ -56,25 +77,47 @@ export default function Budget() {
     setError("");
   };
 
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.amount || Number(form.amount) <= 0) {
+      errors.amount = "Amount must be greater than 0";
+    }
+
+    if (!form.category.trim()) {
+      errors.category = "Category is required";
+    }
+
+    if (!form.month || Number(form.month) < 1 || Number(form.month) > 12) {
+      errors.month = "Month must be between 1 and 12";
+    }
+
+    if (!form.year || String(form.year).length !== 4) {
+      errors.year = "Enter a valid 4-digit year";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
-    if (!form.amount || Number(form.amount) <= 0) {
-      return setError("Amount must be greater than 0");
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
 
       const url = "/api/budget";
       const method = editingId ? "PUT" : "POST";
+
       const bodyPayload = {
         ...form,
         amount: parseFloat(form.amount),
-        month: parseInt(form.month),
-        year: parseInt(form.year),
+        month: parseInt(form.month, 10),
+        year: parseInt(form.year, 10),
       };
 
       if (editingId) bodyPayload.id = editingId;
@@ -89,14 +132,7 @@ export default function Budget() {
       if (!res.ok) throw new Error(data.message);
 
       setMessage(editingId ? "Budget updated!" : "Budget saved!");
-      setEditingId(null);
-      setForm({
-        amount: "",
-        category: "Overall",
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
-      });
-
+      resetForm();
       fetchBudgets();
     } catch (err) {
       setError(err.message);
@@ -105,7 +141,6 @@ export default function Budget() {
     }
   };
 
-  // DELETE FUNCTION
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this budget?")) return;
 
@@ -127,8 +162,8 @@ export default function Budget() {
   };
 
   const months = [
-    "Jan","Feb","Mar","Apr","May","Jun",
-    "Jul","Aug","Sep","Oct","Nov","Dec"
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
   if (status === "loading") return <p>Loading...</p>;
@@ -138,55 +173,90 @@ export default function Budget() {
     <div className="budget-page">
       <h1>Budget Management</h1>
 
-      {message && <p className="success" style={{color: 'green'}}>{message}</p>}
-      {error && <p className="error" style={{color: 'red'}}>{error}</p>}
+      {message && <p className="success">{message}</p>}
+      {error && <p className="error">{error}</p>}
 
-      {/* FORM */}
       <form onSubmit={handleSubmit} className="budget-form">
-        <input
-          name="amount"
-          type="number"
-          step="0.01"
-          placeholder="Amount ($)"
-          value={form.amount}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <input
+            name="amount"
+            type="number"
+            step="0.01"
+            placeholder="Amount ($)"
+            value={form.amount}
+            onChange={handleChange}
+            className={fieldErrors.amount ? "input-error" : ""}
+          />
+          {fieldErrors.amount && (
+            <span className="field-error">{fieldErrors.amount}</span>
+          )}
+        </div>
 
-        <input
-          name="category"
-          placeholder="Category"
-          value={form.category}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <input
+            name="category"
+            placeholder="Category"
+            value={form.category}
+            onChange={handleChange}
+            className={fieldErrors.category ? "input-error" : ""}
+          />
+          {fieldErrors.category && (
+            <span className="field-error">{fieldErrors.category}</span>
+          )}
+        </div>
 
-        <select name="month" value={form.month} onChange={handleChange}>
-          {months.map((m, i) => (
-            <option key={i} value={i + 1}>{m}</option>
-          ))}
-        </select>
+        <div className="form-group">
+          <select
+            name="month"
+            value={form.month}
+            onChange={handleChange}
+            className={fieldErrors.month ? "input-error" : ""}
+          >
+            {months.map((m, i) => (
+              <option key={i} value={i + 1}>
+                {m}
+              </option>
+            ))}
+          </select>
+          {fieldErrors.month && (
+            <span className="field-error">{fieldErrors.month}</span>
+          )}
+        </div>
 
-        <input
-          name="year"
-          type="number"
-          value={form.year}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <input
+            name="year"
+            type="number"
+            value={form.year}
+            onChange={handleChange}
+            className={fieldErrors.year ? "input-error" : ""}
+          />
+          {fieldErrors.year && (
+            <span className="field-error">{fieldErrors.year}</span>
+          )}
+        </div>
 
-        <button disabled={loading}>
-          {loading ? "Saving..." : (editingId ? "Update Budget" : "Save Budget")}
-        </button>
-        {editingId && (
-          <button type="button" onClick={() => {
-            setEditingId(null);
-            setForm({ amount: "", category: "Overall", month: new Date().getMonth() + 1, year: new Date().getFullYear() });
-            setMessage(""); setError("");
-          }} style={{marginLeft: '10px'}}>
-            Cancel
+        <div className="form-group button-group">
+          <button disabled={loading}>
+            {loading ? "Saving..." : editingId ? "Update Budget" : "Save Budget"}
           </button>
-        )}
+
+          {editingId && (
+            <button
+              type="button"
+              className="action-btn"
+              onClick={() => {
+                resetForm();
+                setMessage("");
+                setError("");
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
-      {/* TABLE */}
       <div className="budget-table">
         <h2>Your Budgets</h2>
 
@@ -211,10 +281,17 @@ export default function Budget() {
                   <td>{months[b.month - 1]}</td>
                   <td>{b.year}</td>
                   <td>
-                    <button style={{marginRight: '5px'}} onClick={() => handleEdit(b)}>
+                    <button
+                      className="action-btn"
+                      style={{ marginRight: "5px" }}
+                      onClick={() => handleEdit(b)}
+                    >
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(b.id)}>
+                    <button
+                      className="action-btn"
+                      onClick={() => handleDelete(b.id)}
+                    >
                       Delete
                     </button>
                   </td>

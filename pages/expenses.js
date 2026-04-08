@@ -13,6 +13,7 @@ export default function Expenses() {
     category: "",
     date: "",
   });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [filter, setFilter] = useState("All");
   const [editingId, setEditingId] = useState(null);
   const [loadingExpenses, setLoadingExpenses] = useState(true);
@@ -23,7 +24,6 @@ export default function Expenses() {
     if (!session) router.push("/login");
   }, [session, status, router]);
 
-  // Helper to get local YYYY-MM-DD
   const getLocalDateString = () => {
     const d = new Date();
     return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
@@ -57,30 +57,79 @@ export default function Expenses() {
     if (session) fetchExpenses();
   }, [session]);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const resetForm = () => {
+    setEditingId(null);
+    setFieldErrors({});
+    setForm({
+      name: "",
+      amount: "",
+      category: "",
+      date: getLocalDateString(),
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm({ ...form, [name]: value });
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
 
   const handleEdit = (exp) => {
     setEditingId(exp.id);
+    setFieldErrors({});
     setForm({
       name: exp.name,
       amount: exp.amount,
       category: exp.category,
       date: new Date(exp.date).toISOString().split("T")[0],
     });
+    setError("");
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.name.trim()) {
+      errors.name = "Expense name is required";
+    }
+
+    if (!form.amount || Number(form.amount) <= 0) {
+      errors.amount = "Amount must be greater than 0";
+    }
+
+    if (!form.category.trim()) {
+      errors.category = "Category is required";
+    }
+
+    if (!form.date) {
+      errors.date = "Date is required";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!validateForm()) return;
 
     try {
-      setError("");
-
       if (editingId) {
         const res = await fetch("/api/expenses", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...form, id: editingId }),
+          body: JSON.stringify({
+            ...form,
+            id: editingId,
+            amount: parseFloat(form.amount),
+          }),
         });
 
         if (!res.ok) throw new Error("Failed to update expense");
@@ -89,19 +138,16 @@ export default function Expenses() {
         const res = await fetch("/api/expenses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify({
+            ...form,
+            amount: parseFloat(form.amount),
+          }),
         });
 
         if (!res.ok) throw new Error("Failed to create expense");
       }
 
-      setForm({
-        name: "",
-        amount: "",
-        category: "",
-        date: getLocalDateString(),
-      });
-
+      resetForm();
       fetchExpenses();
     } catch (err) {
       console.error(err);
@@ -131,26 +177,33 @@ export default function Expenses() {
   };
 
   const uniqueCategories = Array.from(
-    new Set(expenses.map((exp) => exp.category))
+    new Set(expenses.map((exp) => exp.category).filter(Boolean))
   );
 
   const searchParam = router.query.search || "";
 
-  const filteredExpenses = expenses.filter(
-    (exp) => {
-      const matchCategoryDrop = filter === "All" || exp.category === filter;
-      const term = searchParam.toLowerCase();
-      
-      if (!term) return matchCategoryDrop;
-      
-      const matchSearch = exp.name.toLowerCase().includes(term) ||
-        exp.category.toLowerCase().includes(term) ||
-        new Date(exp.date).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }).toLowerCase().includes(term) ||
-        exp.date.includes(term);
-        
-      return matchCategoryDrop && matchSearch;
-    }
-  );
+  const filteredExpenses = expenses.filter((exp) => {
+    const matchCategoryDrop = filter === "All" || exp.category === filter;
+    const term = searchParam.toLowerCase();
+
+    if (!term) return matchCategoryDrop;
+
+    const matchSearch =
+      exp.name.toLowerCase().includes(term) ||
+      exp.category.toLowerCase().includes(term) ||
+      new Date(exp.date)
+        .toLocaleDateString("en-US", {
+          timeZone: "UTC",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+        .toLowerCase()
+        .includes(term) ||
+      exp.date.includes(term);
+
+    return matchCategoryDrop && matchSearch;
+  });
 
   if (status === "loading") return <p>Loading...</p>;
   if (!session) return null;
@@ -172,69 +225,89 @@ export default function Expenses() {
             ))}
           </select>
         </div>
+
         <h1>Expense Tracker</h1>
         <div className="header-spacer"></div>
       </div>
 
-      {error && <p className="error-message">{error}</p>}
+      {error && <p className="error">{error}</p>}
 
       <form onSubmit={handleSubmit} className="expense-form-inline">
-        <input
-          name="name"
-          placeholder="Expense Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="amount"
-          type="number"
-          step="0.01"
-          placeholder="Amount"
-          value={form.amount}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="category"
-          placeholder="Category"
-          value={form.category}
-          list="category-options"
-          onChange={handleChange}
-          required
-        />
-        <datalist id="category-options">
-          {uniqueCategories.map((cat) => (
-            <option key={cat} value={cat} />
-          ))}
-        </datalist>
-        <input
-          name="date"
-          type="date"
-          value={form.date}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" className="action-btn add-btn">
-          {editingId ? "Update" : "Add"}
-        </button>
-        {editingId && (
-          <button
-            type="button"
-            className="action-btn"
-            onClick={() => {
-              setEditingId(null);
-              setForm({
-                name: "",
-                amount: "",
-                category: "",
-                date: getLocalDateString(),
-              });
-            }}
-          >
-            Cancel
+        <div className="form-group">
+          <input
+            name="name"
+            placeholder="Expense Name"
+            value={form.name}
+            onChange={handleChange}
+            className={fieldErrors.name ? "input-error" : ""}
+          />
+          {fieldErrors.name && (
+            <span className="field-error">{fieldErrors.name}</span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <input
+            name="amount"
+            type="number"
+            step="0.01"
+            placeholder="Amount"
+            value={form.amount}
+            onChange={handleChange}
+            className={fieldErrors.amount ? "input-error" : ""}
+          />
+          {fieldErrors.amount && (
+            <span className="field-error">{fieldErrors.amount}</span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <input
+            name="category"
+            placeholder="Category"
+            value={form.category}
+            list="category-options"
+            onChange={handleChange}
+            className={fieldErrors.category ? "input-error" : ""}
+          />
+          <datalist id="category-options">
+            {uniqueCategories.map((cat) => (
+              <option key={cat} value={cat} />
+            ))}
+          </datalist>
+          {fieldErrors.category && (
+            <span className="field-error">{fieldErrors.category}</span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <input
+            name="date"
+            type="date"
+            value={form.date}
+            onChange={handleChange}
+            className={fieldErrors.date ? "input-error" : ""}
+          />
+          {fieldErrors.date && (
+            <span className="field-error">{fieldErrors.date}</span>
+          )}
+        </div>
+
+        <div className="form-group button-group">
+          <button type="submit" className="add-btn">
+            {editingId ? "Update" : "Add"}
           </button>
-        )}
+
+          {editingId && (
+            <button
+              type="button"
+              className="action-btn"
+              onClick={resetForm}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="table-container">
@@ -268,13 +341,14 @@ export default function Expenses() {
                     </td>
                     <td>
                       <button
-                        className="action-btn edit-btn"
+                        className="action-btn"
+                        style={{ marginRight: "5px" }}
                         onClick={() => handleEdit(exp)}
                       >
                         Edit
                       </button>
                       <button
-                        className="action-btn delete-btn"
+                        className="action-btn"
                         onClick={() => handleDelete(exp.id)}
                       >
                         Delete
