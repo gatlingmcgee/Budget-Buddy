@@ -14,7 +14,24 @@ export default function Expenses() {
     date: "",
   });
   const [filter, setFilter] = useState("All");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [editingId, setEditingId] = useState(null);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const handleStartDateChange = (e) => {
+    const val = e.target.value;
+    if (endDate && val > endDate) setEndDate(val);
+    setStartDate(val);
+  };
+
+  const handleEndDateChange = (e) => {
+    const val = e.target.value;
+    if (startDate && val < startDate) setStartDate(val);
+    setEndDate(val);
+  };
   const [loadingExpenses, setLoadingExpenses] = useState(true);
   const [error, setError] = useState("");
 
@@ -139,41 +156,89 @@ export default function Expenses() {
   const filteredExpenses = expenses.filter(
     (exp) => {
       const matchCategoryDrop = filter === "All" || exp.category === filter;
+      
+      const expDateStr = new Date(exp.date).toISOString().split("T")[0];
+      const matchStartDate = !startDate || expDateStr >= startDate;
+      const matchEndDate = !endDate || expDateStr <= endDate;
+      const matchDates = matchStartDate && matchEndDate;
+
       const term = searchParam.toLowerCase();
       
-      if (!term) return matchCategoryDrop;
-      
-      const matchSearch = exp.name.toLowerCase().includes(term) ||
-        exp.category.toLowerCase().includes(term) ||
-        new Date(exp.date).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }).toLowerCase().includes(term) ||
-        exp.date.includes(term);
+      let matchSearch = true;
+      if (term) {
+        matchSearch = exp.name.toLowerCase().includes(term) ||
+          exp.category.toLowerCase().includes(term) ||
+          new Date(exp.date).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }).toLowerCase().includes(term) ||
+          exp.date.includes(term);
+      }
         
-      return matchCategoryDrop && matchSearch;
+      return matchCategoryDrop && matchDates && matchSearch;
     }
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, startDate, endDate, searchParam, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedExpenses = filteredExpenses.slice(startIndex, startIndex + itemsPerPage);
 
   if (status === "loading") return <p>Loading...</p>;
   if (!session) return null;
 
   return (
     <div className="expenses-container">
-      <div className="expenses-header">
-        <div className="filter-wrapper">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="All">All Categories</option>
-            {uniqueCategories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="expenses-header" style={{ justifyContent: 'center' }}>
         <h1>Expense Tracker</h1>
-        <div className="header-spacer"></div>
+      </div>
+
+      <div className="filter-row" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', backgroundColor: '#f9f9f9', padding: '1rem', borderRadius: '4px', border: '1px solid #ddd' }}>
+        <strong style={{marginRight: '0.5rem'}}>Filters:</strong>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="filter-select"
+        >
+          <option value="All">All Categories</option>
+          {uniqueCategories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+        
+        <strong style={{marginLeft: '1rem', marginRight: '0.5rem'}}>Date Range:</strong>
+        <input 
+          type="date" 
+          className="filter-select" 
+          value={startDate} 
+          onChange={handleStartDateChange} 
+          title="Start Date"
+        />
+        <span>-</span>
+        <input 
+          type="date" 
+          className="filter-select" 
+          value={endDate} 
+          onChange={handleEndDateChange} 
+          title="End Date"
+        />
+
+        {(startDate || endDate || filter !== "All") && (
+          <button 
+            type="button" 
+            className="action-btn" 
+            style={{ marginLeft: '0.5rem', backgroundColor: '#fff' }}
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+              setFilter("All");
+            }}
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
 
       {error && <p className="error-message">{error}</p>}
@@ -252,8 +317,8 @@ export default function Expenses() {
               </tr>
             </thead>
             <tbody>
-              {filteredExpenses.length > 0 ? (
-                filteredExpenses.map((exp) => (
+              {paginatedExpenses.length > 0 ? (
+                paginatedExpenses.map((exp) => (
                   <tr key={exp.id}>
                     <td>{exp.name}</td>
                     <td>${parseFloat(exp.amount).toFixed(2)}</td>
@@ -291,6 +356,43 @@ export default function Expenses() {
               )}
             </tbody>
           </table>
+        )}
+
+        {!loadingExpenses && filteredExpenses.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', padding: '0 0.5rem' }}>
+            <div>
+              <span style={{ marginRight: '0.5rem', fontWeight: 'bold' }}>Items per page:</span>
+              <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))} className="filter-select" style={{ padding: '0.25rem' }}>
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+            <div>
+              <button 
+                type="button"
+                className="action-btn" 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+                disabled={currentPage === 1}
+                style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+              >
+                Previous
+              </button>
+              <span style={{ margin: '0 1rem', fontWeight: 'bold' }}>
+                Page {currentPage} of {totalPages || 1}
+              </span>
+              <button 
+                type="button"
+                className="action-btn" 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+                disabled={currentPage >= totalPages}
+                style={{ opacity: currentPage >= totalPages ? 0.5 : 1, cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer' }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
