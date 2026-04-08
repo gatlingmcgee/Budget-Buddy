@@ -13,6 +13,7 @@ export default function Budget() {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
   });
+  const [editingId, setEditingId] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -43,6 +44,18 @@ export default function Budget() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleEdit = (b) => {
+    setEditingId(b.id);
+    setForm({
+      amount: b.amount,
+      category: b.category,
+      month: b.month,
+      year: b.year,
+    });
+    setMessage("");
+    setError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -55,21 +68,28 @@ export default function Budget() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/budget", {
-        method: "POST",
+      const url = "/api/budget";
+      const method = editingId ? "PUT" : "POST";
+      const bodyPayload = {
+        ...form,
+        amount: parseFloat(form.amount),
+        month: parseInt(form.month),
+        year: parseInt(form.year),
+      };
+
+      if (editingId) bodyPayload.id = editingId;
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          amount: parseFloat(form.amount),
-          month: parseInt(form.month),
-          year: parseInt(form.year),
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      setMessage("Budget saved!");
+      setMessage(editingId ? "Budget updated!" : "Budget saved!");
+      setEditingId(null);
       setForm({
         amount: "",
         category: "Overall",
@@ -118,8 +138,8 @@ export default function Budget() {
     <div className="budget-page">
       <h1>Budget Management</h1>
 
-      {message && <p className="success">{message}</p>}
-      {error && <p className="error">{error}</p>}
+      {message && <p className="success" style={{color: 'green'}}>{message}</p>}
+      {error && <p className="error" style={{color: 'red'}}>{error}</p>}
 
       {/* FORM */}
       <form onSubmit={handleSubmit} className="budget-form">
@@ -153,8 +173,17 @@ export default function Budget() {
         />
 
         <button disabled={loading}>
-          {loading ? "Saving..." : "Save Budget"}
+          {loading ? "Saving..." : (editingId ? "Update Budget" : "Save Budget")}
         </button>
+        {editingId && (
+          <button type="button" onClick={() => {
+            setEditingId(null);
+            setForm({ amount: "", category: "Overall", month: new Date().getMonth() + 1, year: new Date().getFullYear() });
+            setMessage(""); setError("");
+          }} style={{marginLeft: '10px'}}>
+            Cancel
+          </button>
+        )}
       </form>
 
       {/* TABLE */}
@@ -171,7 +200,7 @@ export default function Budget() {
                 <th>Amount</th>
                 <th>Month</th>
                 <th>Year</th>
-                <th>Action</th> {/* NEW */}
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -182,6 +211,9 @@ export default function Budget() {
                   <td>{months[b.month - 1]}</td>
                   <td>{b.year}</td>
                   <td>
+                    <button style={{marginRight: '5px'}} onClick={() => handleEdit(b)}>
+                      Edit
+                    </button>
                     <button onClick={() => handleDelete(b.id)}>
                       Delete
                     </button>
