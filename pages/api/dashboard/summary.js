@@ -5,11 +5,13 @@ import prisma from "../../../lib/prisma";
 export default async function handler(req, res) {
   try {
     const session = await getServerSession(req, res, authOptions);
+
     if (!session?.user?.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     const userId = parseInt(session.user.id, 10);
+
     if (isNaN(userId)) {
       console.error("Invalid userId from session:", session.user.id);
       return res.status(500).json({ message: "Invalid user session" });
@@ -23,6 +25,7 @@ export default async function handler(req, res) {
     if (month && year) {
       const m = parseInt(month, 10);
       const y = parseInt(year, 10);
+
       if (!isNaN(m) && !isNaN(y)) {
         expenseFilter.date = {
           gte: new Date(y, m - 1, 1),
@@ -33,14 +36,61 @@ export default async function handler(req, res) {
       }
     }
 
-    const budgets = await prisma.budget.findMany({ where: budgetFilter });
-    const expenses = await prisma.expense.findMany({ where: expenseFilter });
+    const budgets = await prisma.budget.findMany({
+      where: budgetFilter,
+    });
 
-    const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
-    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    const expenses = await prisma.expense.findMany({
+      where: expenseFilter,
+      orderBy: [
+        { date: "desc" },
+        { created_at: "desc" },
+      ],
+    });
+
+    const totalBudget = budgets.reduce((sum, b) => {
+      return sum + Number(b.amount);
+    }, 0);
+
+    const totalExpenses = expenses.reduce((sum, e) => {
+      return sum + Number(e.amount);
+    }, 0);
+
     const remaining = totalBudget - totalExpenses;
 
-    return res.status(200).json({ totalBudget, totalExpenses, remaining });
+    const budgetUsedPercent =
+      totalBudget > 0
+        ? Number(((totalExpenses / totalBudget) * 100).toFixed(1))
+        : 0;
+
+    const categoryTotals = expenses.reduce((acc, expense) => {
+      const category = expense.category || "Other";
+      acc[category] = (acc[category] || 0) + Number(expense.amount);
+      return acc;
+    }, {});
+
+    let topCategory = null;
+
+    if (Object.keys(categoryTotals).length > 0) {
+      const [name, amount] = Object.entries(categoryTotals).sort(
+        (a, b) => b[1] - a[1]
+      )[0];
+
+      topCategory = {
+        name,
+        amount: Number(amount.toFixed(2)),
+      };
+    }
+
+    return res.status(200).json({
+      totalBudget,
+      totalExpenses,
+      remaining,
+      budgetUsedPercent,
+      topCategory,
+      recentExpensesCount: expenses.length,
+    });
+
   } catch (error) {
     console.error("Dashboard Summary Error:", error);
     return res.status(500).json({ message: "Internal Server Error" });
