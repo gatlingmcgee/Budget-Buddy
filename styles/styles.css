@@ -117,6 +117,7 @@ a:hover {
   font-size: 0.85rem;
   min-height: 36px;
   background: #fff;
+  width: auto;
 }
 
 /* ===== FORMS ===== */
