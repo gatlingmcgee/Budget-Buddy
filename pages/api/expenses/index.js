@@ -18,7 +18,6 @@ export default async function handler(req, res) {
           { date: "desc" },
           { created_at: "desc" },
         ],
-        take: 5,
       });
 
       return res.status(200).json(expenses);
