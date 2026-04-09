@@ -11,11 +11,11 @@ export default function Home() {
     <div>
       <header>
         <section>
-          <h1>Visualization for Enhancements</h1>
 
           {session ? (
             <div>
-              <p>Welcome, {session.user.username}</p>
+              <h1>Welcome, {session.user.username},</h1>
+              <h1>You are logged in!</h1>
               <p>User ID: {session.user.id}</p>
             </div>
           ) : (
@@ -25,7 +25,7 @@ export default function Home() {
       </header>
 
       <footer>
-        <p>© 2026 Buddy Budget</p>
+        <p>© 2026 Buddy Budget - CSE499 Project</p>
       </footer>
     </div>
   );

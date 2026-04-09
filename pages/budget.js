@@ -301,6 +301,9 @@ export default function Budget() {
           </table>
         )}
       </div>
+      <footer>
+        <p>© 2026 Buddy Budget - CSE499 Project</p>
+      </footer>
     </div>
   );
 }

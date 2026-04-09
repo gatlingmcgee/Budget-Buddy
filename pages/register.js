@@ -85,6 +85,9 @@ export default function Register() {
           Already have an account? <Link href="/login" className={styles.link}>Log in</Link>
         </div>
       </div>
+      <footer>
+        <p>© 2026 Buddy Budget - CSE499 Project</p>
+      </footer>
     </div>
   );
 }
