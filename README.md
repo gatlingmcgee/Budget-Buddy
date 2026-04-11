@@ -9,9 +9,6 @@ Installation & Setup
    • npm install
 3. Set up environment variables
    • Create a .env file in the root directory:
-   • DATABASE_URL=postgresql://postgres:IbztEICsbNtErvQnGawqYOGHUIfICaOx@yamanote.proxy.rlwy.net:10412/railway
-   • NEXTAUTH_SECRET="9w00wiejnrbdkjfbfjkbfu38239282938hrbd%$32"
-   • NEXTAUTH_URL="http://localhost:3000"
 4. Run database migrations
    • npx prisma migrate dev
 5. Start development server
