@@ -24,6 +24,13 @@ const CHART_COLORS = [
   "#14b8a6",
 ];
 
+/**
+ * Main Dashboard Component.
+ * Aggregates budget stats, expenses, and a summary of monthly spending habits.
+ * Contains dynamic charts generated with Chart.js to visualize the selected month data.
+ * Redirects to the login route if the session is invalid or missing.
+ */
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -149,8 +156,8 @@ export default function Dashboard() {
     summary.budgetUsedPercent > 90
       ? "#e63946"
       : summary.budgetUsedPercent > 70
-      ? "#f4a261"
-      : "#2a9d8f";
+        ? "#f4a261"
+        : "#2a9d8f";
 
   if (status === "loading") return <p>Loading...</p>;
   if (!session) return null;
@@ -163,9 +170,9 @@ export default function Dashboard() {
           <p>Here’s your financial overview</p>
         </div>
         <div>
-          <input 
-            type="month" 
-            value={selectedMonth} 
+          <input
+            type="month"
+            value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
             style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontWeight: 'bold' }}
             title="Filter by Month"

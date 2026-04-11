@@ -2,6 +2,15 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../lib/prisma";
 
+/**
+ * Expenses API Endpoint Handler.
+ * Provides RESTful CRUD operations for managing user expenses:
+ * - GET: List all expenses for the authenticated user, ordered by date.
+ * - POST: Create a new expense record.
+ * - PUT: Full update of an existing expense by ID.
+ * - DELETE: Remove an expense by its ID.
+ */
+
 export default async function handler(req, res) {
   try {
     const session = await getServerSession(req, res, authOptions);
@@ -42,7 +51,7 @@ export default async function handler(req, res) {
 
       return res.status(201).json(newExpense);
     }
-    
+
     if (req.method === "PUT") {
       const { id, name, amount, category, date } = req.body;
 

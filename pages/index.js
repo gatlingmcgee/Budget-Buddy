@@ -2,6 +2,12 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 
+/**
+ * Landing Page Component.
+ * Responsive component that switches the hero interface based on user authentication status.
+ * Unauthenticated users see marketing copy; authenticated users see a personalized greeting and dashboard shortcut.
+ */
+
 export default function Home() {
   const { data: session, status } = useSession();
 
@@ -38,8 +44,8 @@ export default function Home() {
               <p style={{ fontSize: '1.2rem', color: '#4b5563', marginBottom: '2.5rem', lineHeight: '1.6' }}>
                 Ready to manage your finances today? Let's take a look at your recent expenses and budget.
               </p>
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 style={{
                   display: 'inline-block',
                   background: '#000',
@@ -63,8 +69,8 @@ export default function Home() {
                 Budget Buddy helps you track your expenses, set budgets, and achieve your financial goals without the hassle.
               </p>
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link 
-                  href="/register" 
+                <Link
+                  href="/register"
                   style={{
                     background: '#000',
                     color: '#fff',
@@ -77,8 +83,8 @@ export default function Home() {
                 >
                   Get Started
                 </Link>
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   style={{
                     background: '#fff',
                     color: '#000',

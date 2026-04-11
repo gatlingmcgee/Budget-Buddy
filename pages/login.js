@@ -5,6 +5,12 @@ import Link from "next/link";
 import Head from "next/head";
 import styles from "../styles/Auth.module.css";
 
+/**
+ * Login Page Component.
+ * Uses NextAuth.js to handle user authentication via the credentials provider.
+ * On successful login, the user is redirected to the home page or dashboard.
+ */
+
 export default function Login() {
   const [message, setMessage] = useState("");
   const router = useRouter();
@@ -42,23 +48,23 @@ export default function Login() {
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="username">Username</label>
-            <input 
+            <input
               id="username"
-              name="username" 
-              className={styles.input} 
-              placeholder="Enter your username" 
-              required 
+              name="username"
+              className={styles.input}
+              placeholder="Enter your username"
+              required
             />
           </div>
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="password">Password</label>
-            <input 
+            <input
               id="password"
-              name="password" 
-              className={styles.input} 
-              placeholder="Enter your password" 
-              type="password" 
-              required 
+              name="password"
+              className={styles.input}
+              placeholder="Enter your password"
+              type="password"
+              required
             />
           </div>
           <button className={styles.button} type="submit">Log In</button>

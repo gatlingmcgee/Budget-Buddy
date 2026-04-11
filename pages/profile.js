@@ -4,6 +4,12 @@ import { useRouter } from "next/router";
 import styles from "../styles/Auth.module.css";
 import Link from "next/link";
 
+/**
+ * User Profile Component.
+ * Fetches the currently authenticated user's details and allows them to update their 
+ * username, email, full name, and optionally change their password.
+ */
+
 export default function Profile() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -114,9 +120,8 @@ export default function Profile() {
 
           {message && (
             <div
-              className={`${styles.message} ${
-                isSuccess ? styles.messageSuccess : ""
-              }`}
+              className={`${styles.message} ${isSuccess ? styles.messageSuccess : ""
+                }`}
             >
               {message}
             </div>

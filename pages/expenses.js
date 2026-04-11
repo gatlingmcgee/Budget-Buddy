@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
+/**
+ * Expense Tracker Component.
+ * Supports paginated view of user's financial expenses along with 
+ * functionalities to create, list, modify, and delete transactions.
+ * Also includes filtering mechanism by date range and category.
+ */
+
 export default function Expenses() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -18,7 +25,7 @@ export default function Expenses() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [editingId, setEditingId] = useState(null);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -202,14 +209,14 @@ export default function Expenses() {
   const filteredExpenses = expenses.filter(
     (exp) => {
       const matchCategoryDrop = filter === "All" || exp.category === filter;
-      
+
       const expDateStr = new Date(exp.date).toISOString().split("T")[0];
       const matchStartDate = !startDate || expDateStr >= startDate;
       const matchEndDate = !endDate || expDateStr <= endDate;
       const matchDates = matchStartDate && matchEndDate;
 
       const term = searchParam.toLowerCase();
-      
+
       let matchSearch = true;
       if (term) {
         matchSearch = exp.name.toLowerCase().includes(term) ||
@@ -217,7 +224,7 @@ export default function Expenses() {
           new Date(exp.date).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }).toLowerCase().includes(term) ||
           exp.date.includes(term);
       }
-        
+
       return matchCategoryDrop && matchDates && matchSearch;
     }
   );
@@ -240,7 +247,7 @@ export default function Expenses() {
       </div>
 
       <div className="filter-row" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', backgroundColor: '#f9f9f9', padding: '1rem', borderRadius: '4px', border: '1px solid #ddd' }}>
-        <strong style={{marginRight: '0.5rem'}}>Filters:</strong>
+        <strong style={{ marginRight: '0.5rem' }}>Filters:</strong>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -253,28 +260,28 @@ export default function Expenses() {
             </option>
           ))}
         </select>
-        
-        <strong style={{marginLeft: '1rem', marginRight: '0.5rem'}}>Date Range:</strong>
-        <input 
-          type="date" 
-          className="filter-select" 
-          value={startDate} 
-          onChange={handleStartDateChange} 
+
+        <strong style={{ marginLeft: '1rem', marginRight: '0.5rem' }}>Date Range:</strong>
+        <input
+          type="date"
+          className="filter-select"
+          value={startDate}
+          onChange={handleStartDateChange}
           title="Start Date"
         />
         <span>-</span>
-        <input 
-          type="date" 
-          className="filter-select" 
-          value={endDate} 
-          onChange={handleEndDateChange} 
+        <input
+          type="date"
+          className="filter-select"
+          value={endDate}
+          onChange={handleEndDateChange}
           title="End Date"
         />
 
         {(startDate || endDate || filter !== "All") && (
-          <button 
-            type="button" 
-            className="action-btn" 
+          <button
+            type="button"
+            className="action-btn"
             style={{ marginLeft: '0.5rem', backgroundColor: '#fff' }}
             onClick={() => {
               setStartDate("");
@@ -436,10 +443,10 @@ export default function Expenses() {
               </select>
             </div>
             <div>
-              <button 
+              <button
                 type="button"
-                className="action-btn" 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+                className="action-btn"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
                 style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
               >
@@ -448,10 +455,10 @@ export default function Expenses() {
               <span style={{ margin: '0 1rem', fontWeight: 'bold' }}>
                 Page {currentPage} of {totalPages || 1}
               </span>
-              <button 
+              <button
                 type="button"
-                className="action-btn" 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+                className="action-btn"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages}
                 style={{ opacity: currentPage >= totalPages ? 0.5 : 1, cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer' }}
               >
