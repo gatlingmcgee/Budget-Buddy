@@ -285,6 +285,9 @@ export default function Dashboard() {
           </table>
         )}
       </section>
+      <footer>
+        <p>© 2026 Buddy Budget - CSE499 Project</p>
+      </footer>
     </div>
   );
 }

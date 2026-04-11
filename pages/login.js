@@ -68,6 +68,9 @@ export default function Login() {
           Don't have an account? <Link href="/register" className={styles.link}>Sign up</Link>
         </div>
       </div>
+      <footer>
+        <p>© 2026 Buddy Budget - CSE499 Project</p>
+      </footer>
     </div>
   );
 }

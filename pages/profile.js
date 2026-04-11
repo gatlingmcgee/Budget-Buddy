@@ -199,6 +199,9 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <footer>
+        <p>© 2026 Buddy Budget - CSE499 Project</p>
+      </footer>
     </div>
   );
 }
