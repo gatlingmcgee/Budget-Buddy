@@ -3,6 +3,11 @@ import Link from "next/link";
 import Head from "next/head";
 import styles from "../styles/Auth.module.css";
 
+/**
+ * Registration Page Component.
+ * Provides a form to create a new user account. Posts user details to the `/api/auth/register` endpoint.
+ */
+
 export default function Register() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
@@ -10,7 +15,7 @@ export default function Register() {
   // Handle the registration form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Send user registration data to the backend API
     const res = await fetch("/api/auth/register", {
       method: "POST",
@@ -21,9 +26,9 @@ export default function Register() {
         password: e.target.password.value,
       }),
     });
-    
+
     const data = await res.json();
-    
+
     if (res.ok) {
       setIsSuccess(true);
       setMessage("Registration successful! You can now log in.");
@@ -44,34 +49,34 @@ export default function Register() {
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="username">Username</label>
-            <input 
+            <input
               id="username"
-              name="username" 
+              name="username"
               className={styles.input}
-              placeholder="Choose a username" 
-              required 
+              placeholder="Choose a username"
+              required
             />
           </div>
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="email">Email address</label>
-            <input 
+            <input
               id="email"
-              name="email" 
+              name="email"
               className={styles.input}
-              placeholder="you@example.com" 
-              type="email" 
-              required 
+              placeholder="you@example.com"
+              type="email"
+              required
             />
           </div>
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="password">Password</label>
-            <input 
+            <input
               id="password"
-              name="password" 
+              name="password"
               className={styles.input}
-              placeholder="Create a strong password" 
-              type="password" 
-              required 
+              placeholder="Create a strong password"
+              type="password"
+              required
             />
           </div>
           <button className={styles.button} type="submit">Sign Up</button>

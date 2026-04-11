@@ -2,6 +2,12 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
+/**
+ * Budget Management Page Component.
+ * Allows users to fetch, create, update, and delete their budget allocations 
+ * per category and month. Requires an active NextAuth user session.
+ */
+
 export default function Budget() {
   const { data: session, status } = useSession();
   const router = useRouter();

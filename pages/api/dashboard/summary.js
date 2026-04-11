@@ -2,6 +2,13 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../lib/prisma";
 
+/**
+ * Dashboard Summary API Endpoint.
+ * Computes and returns aggregated metrics for a specific month/year, 
+ * including total budget, total expenses, remaining budget, percentage used,
+ * and the top spending category.
+ */
+
 export default async function handler(req, res) {
   try {
     const session = await getServerSession(req, res, authOptions);

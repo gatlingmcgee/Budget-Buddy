@@ -2,6 +2,15 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../lib/prisma";
 
+/**
+ * Budget API Endpoint Handler.
+ * Supports CRUD operations for user budgets:
+ * - GET: Fetch user budgets by month and year.
+ * - POST: Upsert (create or update) numerical budget allocation.
+ * - PUT: Target update for an existing budget entry.
+ * - DELETE: Delete a budget configuration by ID.
+ */
+
 export default async function handler(req, res) {
   try {
     // Get session

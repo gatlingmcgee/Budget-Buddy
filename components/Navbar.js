@@ -2,6 +2,12 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
+/**
+ * Main application Navigation Bar.
+ * Renders the global layout header with navigation links based on auth state,
+ * as well as a search bar for expenses.
+ */
+
 export default function Navbar() {
   const { data: session } = useSession();
   const router = useRouter();
