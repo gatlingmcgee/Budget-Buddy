@@ -4,8 +4,8 @@ import Link from "next/link";
 
 /**
  * Landing Page Component.
- * Responsive component that switches the hero interface based on user authentication status.
- * Unauthenticated users see marketing copy; authenticated users see a personalized greeting and dashboard shortcut.
+ * Responsive component that switches the interface based on user authentication status.
+ * Unauthenticated users see login/register options; authenticated users see a personalized greeting and dashboard shortcut.
  */
 
 export default function Home() {
@@ -63,7 +63,7 @@ export default function Home() {
           ) : (
             <>
               <h1 style={{ fontSize: '3rem', marginBottom: '1.2rem', color: '#333', lineHeight: '1.2', margin: '0 0 1.2rem 0' }}>
-                Poupe mais, se preocupe menos.
+                Personal Finance Management System
               </h1>
               <p style={{ fontSize: '1.2rem', color: '#4b5563', marginBottom: '2.5rem', lineHeight: '1.6' }}>
                 Budget Buddy helps you track your expenses, set budgets, and achieve your financial goals without the hassle.
@@ -81,7 +81,7 @@ export default function Home() {
                     border: '2px solid #000',
                   }}
                 >
-                  Get Started
+                  Create Account
                 </Link>
                 <Link
                   href="/login"
