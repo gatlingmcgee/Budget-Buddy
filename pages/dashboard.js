@@ -28,6 +28,12 @@ export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const d = new Date();
+    const localNow = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return localNow.toISOString().substring(0, 7);
+  });
+
   const [summary, setSummary] = useState({
     totalBudget: 0,
     totalExpenses: 0,
@@ -56,8 +62,11 @@ export default function Dashboard() {
         setLoadingSummary(true);
         setLoadingExpenses(true);
 
+        const year = parseInt(selectedMonth.substring(0, 4), 10);
+        const month = parseInt(selectedMonth.substring(5, 7), 10);
+
         const [summaryRes, expenseRes] = await Promise.all([
-          fetch("/api/dashboard/summary"),
+          fetch(`/api/dashboard/summary?month=${month}&year=${year}`),
           fetch("/api/expenses"),
         ]);
 
@@ -81,7 +90,12 @@ export default function Dashboard() {
           recentExpensesCount: summaryData.recentExpensesCount ?? 0,
         });
 
-        setRecentExpenses(Array.isArray(expenseData) ? expenseData : []);
+        const filteredRecent = Array.isArray(expenseData) ? expenseData.filter(exp => {
+          if (!exp.date) return false;
+          return exp.date.startsWith(selectedMonth);
+        }) : [];
+
+        setRecentExpenses(filteredRecent);
       } catch (error) {
         console.error(error);
         setDashboardError("Could not load dashboard data");
@@ -92,7 +106,7 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [session]);
+  }, [session, selectedMonth]);
 
   const categoryTotals = useMemo(() => {
     const totals = {};
@@ -143,9 +157,20 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Welcome back, {session.user.username}</h1>
-        <p>Here’s your financial overview</p>
+      <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1>Welcome back, {session.user.username}</h1>
+          <p>Here’s your financial overview</p>
+        </div>
+        <div>
+          <input 
+            type="month" 
+            value={selectedMonth} 
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontWeight: 'bold' }}
+            title="Filter by Month"
+          />
+        </div>
       </header>
 
       {dashboardError && <p className="error">{dashboardError}</p>}

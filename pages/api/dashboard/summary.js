@@ -28,8 +28,8 @@ export default async function handler(req, res) {
 
       if (!isNaN(m) && !isNaN(y)) {
         expenseFilter.date = {
-          gte: new Date(y, m - 1, 1),
-          lt: new Date(y, m, 1),
+          gte: new Date(Date.UTC(y, m - 1, 1)),
+          lt: new Date(Date.UTC(y, m, 1)),
         };
         budgetFilter.month = m;
         budgetFilter.year = y;
