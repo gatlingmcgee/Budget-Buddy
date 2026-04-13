@@ -216,6 +216,13 @@ button:disabled {
 
 /* ===== TABLES ===== */
 
+.table-container,
+.budget-table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
 .expenses-table,
 .budget-table table {
   width: 100%;
@@ -371,6 +378,13 @@ button:disabled {
   .expense-form-inline,
   .budget-form {
     grid-template-columns: 1fr;
+  }
+
+  .expenses-container,
+  .budget-page,
+  .dashboard {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
   }
 
   .dashboard-card {

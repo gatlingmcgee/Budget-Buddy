@@ -26,15 +26,16 @@ export default function Home() {
         <meta name="description" content="Manage your expenses effortlessly with Budget Buddy" />
       </Head>
 
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
         <div style={{
           textAlign: 'center',
           backgroundColor: '#fff',
-          padding: '3rem 2rem',
+          padding: '2rem 1.5rem',
           borderRadius: '12px',
           boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
           maxWidth: '650px',
-          width: '100%'
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
           {session ? (
             <>
@@ -93,6 +94,7 @@ export default function Home() {
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     border: '2px solid #ccc',
+                    boxSizing: 'border-box'
                   }}
                 >
                   Log In
